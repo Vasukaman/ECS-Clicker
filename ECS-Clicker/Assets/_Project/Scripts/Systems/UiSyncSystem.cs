@@ -1,76 +1,106 @@
-// Filename: UiSyncSystem.cs
-// Location: _Project/Scripts/Systems/
 using Leopotam.EcsLite;
-using UnityEngine.UI; // For making buttons interactable
-using TMPro; // For TextMeshPro
+using UnityEngine.UI;
+using TMPro;
+using System.Linq;
 
+
+/// <summary>
+/// Updates all UI elements every frame to reflect the current game state.
+/// </summary>
 public class UiSyncSystem : IEcsRunSystem
 {
     public void Run(EcsSystems systems)
     {
-        var world = systems.GetWorld();
-        var sharedData = systems.GetShared<SharedData>();
-        var gameConfig = sharedData.GameConfig;
-        var sceneData = sharedData.SceneData;
 
-        // --- Player Balance ---
-        var playerFilter = world.Filter<PlayerTag>().Inc<BalanceComponent>().End();
-        var balancePool = world.GetPool<BalanceComponent>();
+        double playerBalance = GetPlayerBalance(systems.GetWorld());
 
-        double playerBalanceValue = 0; // Get player balance once to use in the loop below
-        foreach (var entity in playerFilter)
+        UpdatePlayerBalanceUI(systems, playerBalance);
+        UpdateAllBusinessViews(systems, playerBalance);
+    }
+
+    /// <summary>
+    /// Updates the main player balance text at the top of the screen.
+    /// </summary>
+    private void UpdatePlayerBalanceUI(EcsSystems systems, double playerBalance)
+    {
+        SceneData sceneData = systems.GetShared<SharedData>().SceneData;
+        sceneData.BalanceText.text = $"{playerBalance:F0}$";
+    }
+
+    /// <summary>
+    /// Loops through all businesses and updates their corresponding UI views.
+    /// </summary>
+    private void UpdateAllBusinessViews(EcsSystems systems, double playerBalance)
+    {
+        EcsWorld world = systems.GetWorld();
+        GameConfig gameConfig = systems.GetShared<SharedData>().GameConfig;
+        NamesConfig namesConfig = systems.GetShared<SharedData>().NamesConfig;
+
+        EcsFilter businessFilter = world.Filter<BusinessComponent>().Inc<ViewComponent>().End();
+        EcsPool<BusinessComponent> businessPool = world.GetPool<BusinessComponent>();
+        EcsPool<ViewComponent> viewPool = world.GetPool<ViewComponent>();
+
+        foreach (int entity in businessFilter)
         {
-            ref var balance = ref balancePool.Get(entity);
-            playerBalanceValue = balance.Value;
-            sceneData.BalanceText.text = $"{playerBalanceValue:F0}$";
+            ref BusinessComponent business = ref businessPool.Get(entity);
+            ref ViewComponent view = ref viewPool.Get(entity);
+            BusinessConfig config = gameConfig.Businesses[business.ConfigId];
+
+
+            BusinessTextData namesTextData = namesConfig.AllBusinessTexts.FirstOrDefault(t => t.BusinessId == config.BusinessId);
+
+            UpdateSingleBusinessView(ref business, ref view, config, namesTextData, playerBalance);
+        }
+    }
+
+    /// <summary>
+    /// Updates all the text and interactive elements for a single business panel.
+    /// </summary>
+    private void UpdateSingleBusinessView(ref BusinessComponent business, ref ViewComponent view, BusinessConfig config, BusinessTextData namesTextData, double playerBalance)
+    {
+        // Use the name from the combined text data
+        view.Value.NameText.text = namesTextData.BusinessName;
+        view.Value.LevelText.text = $"LVL\n{business.Level}";
+        view.Value.IncomeText.text = $"{business.CurrentIncome:F0}$";
+
+        view.Value.ProgressBar.value = business.IncomeTimer / config.IncomeDelay;
+
+        view.Value.LevelUpButtonText.text = $"LVL UP\n{business.LevelUpCost:F0}$";
+        view.Value.LevelUpButton.interactable = playerBalance >= business.LevelUpCost;
+
+        // Pass the specific upgrade name down to the button helper
+        UpdateUpgradeButton(view.Value.Upgrade1Button, view.Value.Upgrade1ButtonText, business.IsUpgrade1Purchased, config.Upgrade1, namesTextData.Upgrade1Name, playerBalance);
+        UpdateUpgradeButton(view.Value.Upgrade2Button, view.Value.Upgrade2ButtonText, business.IsUpgrade2Purchased, config.Upgrade2, namesTextData.Upgrade2Name, playerBalance);
+    }
+
+    /// <summary>
+    /// A generic helper to update the state of an upgrade button.
+    /// </summary>
+    private void UpdateUpgradeButton(Button button, TMP_Text buttonText, bool isPurchased, UpgradeConfig upgradeConfig, string upgradeName, double playerBalance)
+    {
+        if (isPurchased)
+        {
+            button.interactable = false;
+            buttonText.text = $"{upgradeName}";
+        }
+        else
+        {
+            button.interactable = playerBalance >= upgradeConfig.Price;
+            buttonText.text = $"{upgradeName}\n{upgradeConfig.Price:F0}$";
+        }
+    }
+
+    private double GetPlayerBalance(EcsWorld world)
+    {
+        EcsFilter playerFilter = world.Filter<PlayerTag>().Inc<BalanceComponent>().End();
+
+        if (playerFilter.GetEntitiesCount() > 0)
+        {
+            int playerEntity = playerFilter.GetRawEntities()[0];
+            ref BalanceComponent balance = ref world.GetPool<BalanceComponent>().Get(playerEntity);
+            return balance.Value;
         }
 
-        // --- Business UI ---
-        var businessFilter = world.Filter<BusinessComponent>().Inc<ViewComponent>().End();
-        var businessPool = world.GetPool<BusinessComponent>();
-        var viewPool = world.GetPool<ViewComponent>();
-
-        foreach (var entity in businessFilter)
-        {
-            ref var business = ref businessPool.Get(entity);
-            ref var view = ref viewPool.Get(entity);
-            var config = gameConfig.Businesses[business.ConfigId];
-
-            // --- READ pre-calculated values, DON'T recalculate here ---
-            view.Value.NameText.text = config.BusinessName;
-            view.Value.LevelText.text = $"LVL\n{business.Level}";
-            view.Value.IncomeText.text = $"{business.CurrentIncome:F0}$";
-            view.Value.LevelUpButtonText.text = $"LVL UP\n{business.LevelUpCost:F0}$";
-
-            // --- Update dynamic UI elements that change every frame ---
-            view.Value.ProgressBar.value = business.IncomeTimer / config.IncomeDelay;
-
-            // --- Update Button States based on affordability and purchase status ---
-            view.Value.LevelUpButton.interactable = playerBalanceValue >= business.LevelUpCost;
-
-            // Update Upgrade 1 Button
-            if (business.IsUpgrade1Purchased)
-            {
-                view.Value.Upgrade1Button.interactable = false;
-                view.Value.Upgrade1ButtonText.text = "Purchased";
-            }
-            else
-            {
-                view.Value.Upgrade1Button.interactable = playerBalanceValue >= config.Upgrade1.Price;
-                view.Value.Upgrade1ButtonText.text = $"{config.Upgrade1.Name}\n{config.Upgrade1.Price:F0}$";
-            }
-
-            // Update Upgrade 2 Button
-            if (business.IsUpgrade2Purchased)
-            {
-                view.Value.Upgrade2Button.interactable = false;
-                view.Value.Upgrade2ButtonText.text = "Purchased";
-            }
-            else
-            {
-                view.Value.Upgrade2Button.interactable = playerBalanceValue >= config.Upgrade2.Price;
-                view.Value.Upgrade2ButtonText.text = $"{config.Upgrade2.Name}\n{config.Upgrade2.Price:F0}$";
-            }
-        }
+        return 0;
     }
 }

@@ -1,24 +1,28 @@
-// Filename: IncomeProgressSystem.cs
-// Location: _Project/Scripts/ECS/Systems/
 using Leopotam.EcsLite;
 using UnityEngine;
 
+/// <summary>
+/// Updates the income progress timer for all active businesses each frame.
+/// </summary>
 public class IncomeProgressSystem : IEcsRunSystem
 {
     public void Run(EcsSystems systems)
     {
-        var world = systems.GetWorld();
-        var filter = world.Filter<BusinessComponent>().End();
-        var businessPool = world.GetPool<BusinessComponent>();
+        EcsWorld world = systems.GetWorld();
+        EcsFilter filter = world.Filter<BusinessComponent>().End();
+        EcsPool<BusinessComponent> businessPool = world.GetPool<BusinessComponent>();
 
-        foreach (var entity in filter)
+
+        float deltaTime = Time.deltaTime;
+
+        foreach (int entity in filter)
         {
-            ref var business = ref businessPool.Get(entity);
+            ref BusinessComponent business = ref businessPool.Get(entity);
 
-            // Only update progress for businesses the player owns
+            // Only update progress for businesses the player owns (Level > 0).
             if (business.Level > 0)
             {
-                business.IncomeTimer += Time.deltaTime;
+                business.IncomeTimer += deltaTime;
             }
         }
     }

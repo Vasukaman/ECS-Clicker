@@ -7,7 +7,6 @@ using UnityEngine;
 public class SceneData : MonoBehaviour
 {
     public TMP_Text BalanceText;
-    public BusinessView[] BusinessViews;
 
     public BusinessView BusinessViewPrefab;
     public RectTransform BusinessPanelContainer; // T

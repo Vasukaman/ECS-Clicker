@@ -6,6 +6,13 @@ using Leopotam.EcsLite;
 
 struct PlayerTag { }
 
+
+/// <summary>
+/// A marker interface for any component that is a short-lived, broadcast-style event.
+/// </summary>
+public interface IBroadcastEvent { }
+
+
 // Holds the player's money
 struct BalanceComponent
 {
@@ -39,7 +46,7 @@ struct ViewComponent
 }
 
 // Add to Components.cs
-public struct RevenueCollectedEvent
+public struct RevenueCollectedEvent: IBroadcastEvent
 {
     public double Amount;
 }

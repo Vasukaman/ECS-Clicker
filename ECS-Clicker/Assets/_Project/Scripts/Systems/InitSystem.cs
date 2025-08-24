@@ -1,14 +1,19 @@
-// In InitSystem.cs
 using Leopotam.EcsLite;
 using UnityEngine;
 
+/// <summary>
+/// Initializes the game world when the game starts.
+/// Creates the player and business entities from the game config or a save file.
+/// </summary>
 public class InitSystem : IEcsInitSystem
 {
+
     public void Init(EcsSystems systems)
     {
         EcsWorld world = systems.GetWorld();
         GameConfig gameConfig = systems.GetShared<SharedData>().GameConfig;
         SceneData sceneData = systems.GetShared<SharedData>().SceneData;
+
         bool hasSave = PlayerPrefs.HasKey("SaveVersion");
 
         InitializePlayer(world, gameConfig, hasSave);
@@ -19,6 +24,9 @@ public class InitSystem : IEcsInitSystem
         }
     }
 
+    /// <summary>
+    /// Creates the single player entity and sets its starting balance.
+    /// </summary>
     private void InitializePlayer(EcsWorld world, GameConfig gameConfig, bool hasSave)
     {
         int playerEntity = world.NewEntity();
@@ -27,6 +35,9 @@ public class InitSystem : IEcsInitSystem
         balance.Value = GetInitialBalance(hasSave, gameConfig);
     }
 
+    /// <summary>
+    /// Creates a single business entity, gets its initial state, and creates its UI view.
+    /// </summary>
     private void InitializeBusiness(EcsWorld world, GameConfig gameConfig, SceneData sceneData, int index, bool hasSave)
     {
         int businessEntity = world.NewEntity();
@@ -37,6 +48,9 @@ public class InitSystem : IEcsInitSystem
         CreateRecalculateRequest(world, world.PackEntity(businessEntity));
     }
 
+    /// <summary>
+    /// Instantiates a UI prefab for a business and links it to the corresponding ECS entity.
+    /// </summary>
     private void CreateBusinessView(EcsWorld world, int businessEntity, SceneData sceneData)
     {
         BusinessView newView = Object.Instantiate(sceneData.BusinessViewPrefab, sceneData.BusinessPanelContainer);
@@ -51,6 +65,9 @@ public class InitSystem : IEcsInitSystem
         }
     }
 
+    /// <summary>
+    /// Picks player balance from save or config
+    /// </summary>
     private double GetInitialBalance(bool hasSave, GameConfig gameConfig)
     {
         if (!hasSave) return gameConfig.StartingBalance;
@@ -60,6 +77,7 @@ public class InitSystem : IEcsInitSystem
         return result;
     }
 
+
     private void CreateRecalculateRequest(EcsWorld world, EcsPackedEntity targetBusiness)
     {
         int requestEntity = world.NewEntity();
@@ -67,7 +85,9 @@ public class InitSystem : IEcsInitSystem
         request.TargetBusiness = targetBusiness;
     }
 
-
+    /// <summary>
+    /// Constructs the initial state of a BusinessComponent, loading from a save or using defaults.
+    /// </summary>
     private BusinessComponent GetInitialBusinessState(bool hasSave, BusinessConfig config, int index)
     {
         BusinessComponent businessState = new BusinessComponent();
@@ -82,7 +102,7 @@ public class InitSystem : IEcsInitSystem
         }
         else
         {
-            businessState.Level = config.InitialLevel; // Use the value from the SO
+            businessState.Level = config.InitialLevel;
             businessState.IncomeTimer = 0f;
             businessState.IsUpgrade1Purchased = false;
             businessState.IsUpgrade2Purchased = false;
