@@ -1,56 +1,92 @@
-// Filename: InitSystem.cs
-// Location: _Project/Scripts/Systems/
+// In InitSystem.cs
 using Leopotam.EcsLite;
-using UnityEngine; // Required for Object.Instantiate
+using UnityEngine;
 
 public class InitSystem : IEcsInitSystem
 {
     public void Init(EcsSystems systems)
     {
-        var world = systems.GetWorld();
-        var sharedData = systems.GetShared<SharedData>();
-        var gameConfig = sharedData.GameConfig;
-        var sceneData = sharedData.SceneData;
+        EcsWorld world = systems.GetWorld();
+        GameConfig gameConfig = systems.GetShared<SharedData>().GameConfig;
+        SceneData sceneData = systems.GetShared<SharedData>().SceneData;
+        bool hasSave = PlayerPrefs.HasKey("SaveVersion");
 
-        // Create the Player entity
-        var playerEntity = world.NewEntity();
-        world.GetPool<PlayerTag>().Add(playerEntity);
-        ref var balance = ref world.GetPool<BalanceComponent>().Add(playerEntity);
-        balance.Value = gameConfig.StartingBalance;
+        InitializePlayer(world, gameConfig, hasSave);
 
-        // Create entities for each business
         for (int i = 0; i < gameConfig.Businesses.Count; i++)
         {
-            var businessEntity = world.NewEntity();
-            ref var business = ref world.GetPool<BusinessComponent>().Add(businessEntity);
-            var config = gameConfig.Businesses[i];
-
-            // --- REFACTOR APPLIED ---
-            // Use the array index 'i' as the ConfigId
-            business.ConfigId = i;
-            business.Level = (i == 0) ? 1 : 0;
-            business.IncomeTimer = 0f;
-            // We'll calculate CurrentIncome and LevelUpCost in a separate system/method
-            // to avoid duplicating logic. For now, let's leave it simple.
-            business.CurrentIncome = (business.Level > 0) ? config.BaseIncome : 0;
-            business.LevelUpCost = (business.Level + 1) * config.BaseCost;
-
-
-            // --- NEW LOGIC: SPAWN PREFAB AND INITIALIZE BUTTONS ---
-            // 1. Instantiate the UI prefab
-            BusinessView newView = Object.Instantiate(sceneData.BusinessViewPrefab, sceneData.BusinessPanelContainer);
-
-            // 2. Link the entity to its newly created view
-            ref var view = ref world.GetPool<ViewComponent>().Add(businessEntity);
-            view.Value = newView;
-
-            // 3. Find and initialize the button bridges on the new view
-            EcsPackedEntity packedBusiness = world.PackEntity(businessEntity);
-            var bridges = newView.GetComponentsInChildren<EcsClickEventBridge>();
-            foreach (var bridge in bridges)
-            {
-                bridge.Initialize(world, packedBusiness);
-            }
+            InitializeBusiness(world, gameConfig, sceneData, i, hasSave);
         }
+    }
+
+    private void InitializePlayer(EcsWorld world, GameConfig gameConfig, bool hasSave)
+    {
+        int playerEntity = world.NewEntity();
+        world.GetPool<PlayerTag>().Add(playerEntity);
+        ref BalanceComponent balance = ref world.GetPool<BalanceComponent>().Add(playerEntity);
+        balance.Value = GetInitialBalance(hasSave, gameConfig);
+    }
+
+    private void InitializeBusiness(EcsWorld world, GameConfig gameConfig, SceneData sceneData, int index, bool hasSave)
+    {
+        int businessEntity = world.NewEntity();
+        ref BusinessComponent business = ref world.GetPool<BusinessComponent>().Add(businessEntity);
+        business = GetInitialBusinessState(hasSave, gameConfig.Businesses[index], index);
+
+        CreateBusinessView(world, businessEntity, sceneData);
+        CreateRecalculateRequest(world, world.PackEntity(businessEntity));
+    }
+
+    private void CreateBusinessView(EcsWorld world, int businessEntity, SceneData sceneData)
+    {
+        BusinessView newView = Object.Instantiate(sceneData.BusinessViewPrefab, sceneData.BusinessPanelContainer);
+        ref ViewComponent view = ref world.GetPool<ViewComponent>().Add(businessEntity);
+        view.Value = newView;
+
+        EcsPackedEntity packedBusiness = world.PackEntity(businessEntity);
+        EcsClickEventBridge[] bridges = newView.GetComponentsInChildren<EcsClickEventBridge>();
+        foreach (EcsClickEventBridge bridge in bridges)
+        {
+            bridge.Initialize(world, packedBusiness);
+        }
+    }
+
+    private double GetInitialBalance(bool hasSave, GameConfig gameConfig)
+    {
+        if (!hasSave) return gameConfig.StartingBalance;
+
+        string savedBalance = PlayerPrefs.GetString("Player_Balance", "0");
+        double.TryParse(savedBalance, out double result);
+        return result;
+    }
+
+    private void CreateRecalculateRequest(EcsWorld world, EcsPackedEntity targetBusiness)
+    {
+        int requestEntity = world.NewEntity();
+        ref RecalculateStatsRequest request = ref world.GetPool<RecalculateStatsRequest>().Add(requestEntity);
+        request.TargetBusiness = targetBusiness;
+    }
+
+
+    private BusinessComponent GetInitialBusinessState(bool hasSave, BusinessConfig config, int index)
+    {
+        BusinessComponent businessState = new BusinessComponent();
+        businessState.ConfigId = index;
+
+        if (hasSave)
+        {
+            businessState.Level = PlayerPrefs.GetInt($"{config.BusinessId}_Level", config.InitialLevel);
+            businessState.IncomeTimer = PlayerPrefs.GetFloat($"{config.BusinessId}_IncomeTimer", 0f);
+            businessState.IsUpgrade1Purchased = PlayerPrefs.GetInt($"{config.BusinessId}_Upgrade1", 0) == 1;
+            businessState.IsUpgrade2Purchased = PlayerPrefs.GetInt($"{config.BusinessId}_Upgrade2", 0) == 1;
+        }
+        else
+        {
+            businessState.Level = config.InitialLevel; // Use the value from the SO
+            businessState.IncomeTimer = 0f;
+            businessState.IsUpgrade1Purchased = false;
+            businessState.IsUpgrade2Purchased = false;
+        }
+        return businessState;
     }
 }

@@ -12,8 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 53ea9bff2f0d01d49b86fcfdb88ba011, type: 3}
   m_Name: BusinessConfig
   m_EditorClassIdentifier: 
-  Id: 0
   BusinessName: COOL BUISNESS
   IncomeDelay: 10
   BaseCost: 5
   BaseIncome: 20
+  BusinessId: 
+  Upgrade1:
+    Name: MEGA1
+    Price: 50
+    IncomeMultiplierPercent: 50
+  Upgrade2:
+    Name: MEGA SUPER2
+    Price: 100
+    IncomeMultiplierPercent: 100

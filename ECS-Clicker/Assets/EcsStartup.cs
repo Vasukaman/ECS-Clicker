@@ -12,11 +12,11 @@ public class EcsStartup : MonoBehaviour
 
     private EcsWorld _world;
     private EcsSystems _systems;
-
+    private SaveUtility _saveUtility;
     void Start()
     {
         _world = new EcsWorld();
-
+        _saveUtility = new SaveUtility();
         // 1. Create an instance of your shared data container
         var sharedData = new SharedData
         {
@@ -50,6 +50,12 @@ public class EcsStartup : MonoBehaviour
 
     void OnDestroy()
     {
+        if (_world != null)
+        {
+            _saveUtility.Save(_world, _gameConfig);
+        }
+
+
         if (_systems != null)
         {
             _systems.Destroy();
@@ -60,5 +66,7 @@ public class EcsStartup : MonoBehaviour
             _world.Destroy();
             _world = null;
         }
+
+
     }
 }

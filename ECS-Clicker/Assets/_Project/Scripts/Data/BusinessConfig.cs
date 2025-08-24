@@ -19,8 +19,10 @@ public class BusinessConfig : ScriptableObject
     public float IncomeDelay;
     public double BaseCost;
     public double BaseIncome;
-
+    public string BusinessId;
+    public int InitialLevel;
     // Add these two fields for the upgrades
     public UpgradeConfig Upgrade1;
     public UpgradeConfig Upgrade2;
+
 }
