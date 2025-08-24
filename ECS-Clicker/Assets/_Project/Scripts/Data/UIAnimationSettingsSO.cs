@@ -1,6 +1,6 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "UIAnimationSettings", menuName = "UI/Animation Settings")]
+[CreateAssetMenu(fileName = "UIAnimationSettings", menuName = "UI/Wobble Animation Settings")]
 public class UIWobbleAnimationSettingsSO : ScriptableObject
 {
     [Tooltip("How strongly the scale pulls back to its original size.")]
