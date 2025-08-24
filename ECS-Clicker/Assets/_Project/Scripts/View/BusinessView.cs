@@ -18,4 +18,5 @@ public class BusinessView : MonoBehaviour
     public TMP_Text Upgrade1ButtonText;
     public Button Upgrade2Button;
     public TMP_Text Upgrade2ButtonText;
+    public UIWobbleAnimation PanelWobbleAnimation;
 }

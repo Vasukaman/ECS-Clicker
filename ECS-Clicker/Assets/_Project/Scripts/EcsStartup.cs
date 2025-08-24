@@ -41,7 +41,7 @@ public class EcsStartup : MonoBehaviour
 
             // 2. Game Logic (progress timers, check for payouts)
             .Add(new IncomeProgressSystem())
-            .Add(new BusinessRevenueSystem())
+            .Add(new BusinessPayoutSystem())
 
             // 3. Player Action Handlers (react to clicks)
             .Add(new LevelUpSystem())
@@ -53,6 +53,7 @@ public class EcsStartup : MonoBehaviour
 
             // 5. Presentation & Cleanup (update UI, destroy temporary events)
             .Add(new UiSyncSystem())
+            .Add(new UIPayoutFeedbackSystem())
             .Add(new EventCleanupSystem());
 
         _systems.Init();

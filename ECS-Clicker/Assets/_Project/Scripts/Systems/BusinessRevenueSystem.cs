@@ -4,7 +4,7 @@ using Leopotam.EcsLite;
 /// Checks business timers and creates a RevenueCollectedEvent when a payout is ready.
 /// This system acts as a producer of revenue events.
 /// </summary>
-public class BusinessRevenueSystem : IEcsRunSystem
+public class BusinessPayoutSystem : IEcsRunSystem
 {
     public void Run(EcsSystems systems)
     {
@@ -28,7 +28,7 @@ public class BusinessRevenueSystem : IEcsRunSystem
             BusinessConfig config = gameConfig.Businesses[business.ConfigId];
             business.IncomeTimer -= config.IncomeDelay;
 
-            CreatePayoutEvent(world, business.CurrentIncome);
+            CreatePayoutEvent(world, business.CurrentIncome, businessEntity);
         }
     }
 
@@ -42,10 +42,11 @@ public class BusinessRevenueSystem : IEcsRunSystem
         return business.IncomeTimer >= config.IncomeDelay;
     }
 
-    private void CreatePayoutEvent(EcsWorld world, double amount)
+    private void CreatePayoutEvent(EcsWorld world, double amount, int businessEntity)
     {
         int eventEntity = world.NewEntity();
         ref RevenueCollectedEvent evt = ref world.GetPool<RevenueCollectedEvent>().Add(eventEntity);
         evt.Amount = amount;
+        evt.SourceBusiness = world.PackEntity(businessEntity);
     }
 }

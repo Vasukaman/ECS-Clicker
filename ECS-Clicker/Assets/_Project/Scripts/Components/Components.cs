@@ -1,69 +1,36 @@
-// Filename: Components.cs
-// Location: _Project/Scripts/Components/
-
-// A "tag" component to identify the single player entity
 using Leopotam.EcsLite;
 
-struct PlayerTag { }
-
+/// <summary>
+/// A tag to identify the single player entity.
+/// </summary>
+public struct PlayerTag { }
 
 /// <summary>
-/// A marker interface for any component that is a short-lived, broadcast-style event.
+/// Holds the player's current money.
 /// </summary>
-public interface IBroadcastEvent { }
-
-
-// Holds the player's money
-struct BalanceComponent
+public struct BalanceComponent
 {
     public double Value;
 }
 
-// Holds the state of a single business
-struct BusinessComponent
+/// <summary>
+/// Holds the dynamic state of a single business.
+/// </summary>
+public struct BusinessComponent
 {
-    public int ConfigId; // Changed to int for performance (array index)
+    public int ConfigId;
     public int Level;
-    public float IncomeTimer; // Tracks seconds passed
-
-    // Add these fields to store calculated data
-    public double CurrentIncome;
-    public double LevelUpCost;
-
+    public float IncomeTimer;
     public bool IsUpgrade1Purchased;
     public bool IsUpgrade2Purchased;
+    public double CurrentIncome;
+    public double LevelUpCost;
 }
 
-public struct RecalculateStatsRequest
-{
-    public EcsPackedEntity TargetBusiness;
-}
-
-// Links an entity to its MonoBehaviour view in the scene
-struct ViewComponent
+/// <summary>
+/// Links an ECS entity to its MonoBehaviour view in the scene.
+/// </summary>
+public struct ViewComponent
 {
     public BusinessView Value;
-}
-
-// Add to Components.cs
-public struct RevenueCollectedEvent: IBroadcastEvent
-{
-    public double Amount;
-}
-
-
-// Add to Components.cs
-
-// An event created when the player clicks the "Level Up" button
-public struct LevelUpRequest
-{
-    // Which business entity should be leveled up?
-    public EcsPackedEntity TargetBusiness;
-}
-
-// An event created when the player clicks an "Upgrade" button
-public struct UpgradeRequest
-{
-    public EcsPackedEntity TargetBusiness;
-    public int UpgradeId; // 0 for the first upgrade, 1 for the second
 }
