@@ -34,6 +34,7 @@ public class EcsStartup : MonoBehaviour
               .Add(new IncomeProgressSystem()) // Runs first to update timers
               .Add(new BusinessRevenueSystem()) // Creates events
               .Add(new UpgradeSystem())
+              .Add(new LevelUpSystem())
               .Add(new PlayerBalanceSystem())
               .Add(new BusinessStatsSystem())
               .Add(new UiSyncSystem())
