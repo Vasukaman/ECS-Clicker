@@ -1,4 +1,4 @@
-using Leopotam.EcsLite;
+﻿using Leopotam.EcsLite;
 using UnityEngine.UI;
 using TMPro;
 using System.Linq;
@@ -59,13 +59,13 @@ public class UiSyncSystem : IEcsRunSystem
     private void UpdateSingleBusinessView(ref BusinessComponent business, ref ViewComponent view, BusinessConfig config, BusinessTextData namesTextData, double playerBalance)
     {
         // Use the name from the combined text data
-        view.Value.NameText.text = namesTextData.BusinessName;
-        view.Value.LevelText.text = $"LVL\n{business.Level}";
+        view.Value.NameText.text = $"\"{namesTextData.BusinessName}\"";
+        view.Value.LevelText.text = $"{business.Level}";
         view.Value.IncomeText.text = $"{business.CurrentIncome:F0}$";
 
-        view.Value.ProgressBar.value = business.IncomeTimer / config.IncomeDelay;
+        view.Value.ProgressBar.fillAmount = business.IncomeTimer / config.IncomeDelay;
 
-        view.Value.LevelUpButtonText.text = $"LVL UP\n{business.LevelUpCost:F0}$";
+        view.Value.LevelUpButtonText.text = $"LVL UP\nЦена: {business.LevelUpCost:F0}$";
         view.Value.LevelUpButton.interactable = playerBalance >= business.LevelUpCost;
 
         // Pass the specific upgrade name down to the button helper
@@ -81,12 +81,16 @@ public class UiSyncSystem : IEcsRunSystem
         if (isPurchased)
         {
             button.interactable = false;
-            buttonText.text = $"{upgradeName}";
+            buttonText.text = $"\"{upgradeName}\"\n" +
+                              $"Доход: +{upgradeConfig.IncomeMultiplierPercent}%\n" +
+                              $"Куплено";
         }
         else
         {
             button.interactable = playerBalance >= upgradeConfig.Price;
-            buttonText.text = $"{upgradeName}\n{upgradeConfig.Price:F0}$";
+            buttonText.text = $"\"{upgradeName}\"\n" +
+                            $"Доход: +{upgradeConfig.IncomeMultiplierPercent}%\n" +
+                            $"Цена: {upgradeConfig.Price:F0}$";
         }
     }
 

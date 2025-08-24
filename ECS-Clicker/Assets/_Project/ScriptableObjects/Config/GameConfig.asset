@@ -18,4 +18,4 @@ MonoBehaviour:
   - {fileID: 11400000, guid: c3820f2c6c38a2c4d8a1675ec2aace3f, type: 2}
   - {fileID: 11400000, guid: 218ea709ed252794fb01b5766f9f9abf, type: 2}
   - {fileID: 11400000, guid: 5155a08006e5ab64bb934747f05a9f0c, type: 2}
-  StartingBalance: 1000
+  StartingBalance: 100000

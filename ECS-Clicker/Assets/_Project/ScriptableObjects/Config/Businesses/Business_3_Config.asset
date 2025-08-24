@@ -13,13 +13,13 @@ MonoBehaviour:
   m_Name: Business_3_Config
   m_EditorClassIdentifier: 
   IncomeDelay: 10
-  BaseCost: 5
-  BaseIncome: 100
+  BaseCost: 200
+  BaseIncome: 200
   BusinessId: business_3
   InitialLevel: 0
   Upgrade1:
-    Price: 50
-    IncomeMultiplierPercent: 50
-  Upgrade2:
-    Price: 100
+    Price: 6000
     IncomeMultiplierPercent: 100
+  Upgrade2:
+    Price: 20000
+    IncomeMultiplierPercent: 150

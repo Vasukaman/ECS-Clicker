@@ -12,14 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 53ea9bff2f0d01d49b86fcfdb88ba011, type: 3}
   m_Name: Business_5_Config
   m_EditorClassIdentifier: 
-  IncomeDelay: 10
-  BaseCost: 5
-  BaseIncome: 100
+  IncomeDelay: 30
+  BaseCost: 5000
+  BaseIncome: 5000
   BusinessId: business_5
   InitialLevel: 0
   Upgrade1:
-    Price: 50
-    IncomeMultiplierPercent: 50
+    Price: 100000
+    IncomeMultiplierPercent: 200
   Upgrade2:
-    Price: 100
-    IncomeMultiplierPercent: 100
+    Price: 500000
+    IncomeMultiplierPercent: 400

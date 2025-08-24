@@ -10,7 +10,7 @@ public class BusinessView : MonoBehaviour
     public TMP_Text NameText;
     public TMP_Text LevelText;
     public TMP_Text IncomeText;
-    public Slider ProgressBar;
+    public Image ProgressBar;
     public Button LevelUpButton;
     public TMP_Text LevelUpButtonText;
 
