@@ -17,7 +17,7 @@ public struct BusinessTextData
 /// <summary>
 /// ScriptableObject that contains all localizable text for the game.
 /// </summary>
-[CreateAssetMenu(fileName = "NamesConfig", menuName = "Game/Names Config")]
+[CreateAssetMenu(fileName = "NamesConfig", menuName = "Clicker/Names Config")]
 public class NamesConfig : ScriptableObject
 {
     public List<BusinessTextData> AllBusinessTexts;
