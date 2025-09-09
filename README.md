@@ -59,10 +59,6 @@ The project is built around a clean, logical data pipeline that emphasizes the s
 
 To improve the development and testing workflow, several custom editor tools were created. These allow for quick iteration and debugging without needing to play through the game manually.
 
-*(Here you can add a GIF showcasing you using the menu)*
-
-**[Image or GIF of the "Tools > Save Data" menu in action]**
-
 The tools, accessible from the **Tools > Save Data** menu, provide functionality for:
 * Clearing all saved data to test a fresh install.
 * Resetting player balance or business progress independently.
