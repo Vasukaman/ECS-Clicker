@@ -2,6 +2,8 @@
 
 This project is a simple idle clicker/tycoon prototype built from the ground up using a pure **Entity Component System (ECS)** architecture with the **LeoEcsLite** framework. It was originally created as a technical test and has since been refined as a portfolio piece to demonstrate clean, data-driven, and event-driven design patterns in Unity.
 
+![ECS gif](https://github.com/user-attachments/assets/f3e41fa7-6deb-4191-b84b-97f54d9c558b)
+
 ---
 
 ### Key Features & Architecture
@@ -17,6 +19,7 @@ The project is built around a clean, logical data pipeline that emphasizes the s
 * **Microsoft C# Code Style:** The codebase adheres to standard Microsoft C# naming and layout conventions for clarity and maintainability.
 
 ---
+
 
 ### Editor Tools
 
